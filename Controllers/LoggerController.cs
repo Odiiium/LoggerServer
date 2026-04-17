@@ -34,6 +34,23 @@ namespace LoggerServer.Controllers
             }
         }
 
+        [HttpGet("getuserids/{count:int}")]
+        public IResult GetUserIds(int count)
+        {
+            var logsDir = "logs";
+
+            if (!Directory.Exists(logsDir))
+                return Results.Ok(Array.Empty<string>());
+
+            var userIds = Directory.GetDirectories(logsDir)
+                .OrderByDescending(d => Directory.GetLastWriteTimeUtc(d))
+                .Take(count)
+                .Select(d => Path.GetFileName(d))
+                .ToList();
+
+            return Results.Ok(userIds);
+        }
+
         // GET /Logger/logs/{userId} - все даты для пользователя
         // GET /Logger/logs/{userId}/{date} - конкретный день (формат: yyyy-MM-dd)
         [HttpGet("logs/{userId}/{date?}")]
